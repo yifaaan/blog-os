@@ -14,14 +14,18 @@ fn panic(_info: &PanicInfo) -> ! {
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    // let vga_buffer = 0xb8000 as *mut u8;
+    use core::fmt::Write;
+    vga_buffer::WRITER
+        .lock()
+        .write_str("Hello again\n")
+        .unwrap();
+    write!(
+        vga_buffer::WRITER.lock(),
+        ", some numbers: {} {}",
+        42,
+        1232.234234
+    )
+    .unwrap();
 
-    // for (i, c) in HELLO.iter().enumerate() {
-    //     unsafe {
-    //         *vga_buffer.offset(i as isize * 2) = *c;
-    //         *vga_buffer.offset(i as isize * 2 + 1) = 0x0f;
-    //     }
-    // }
-    vga_buffer::print_something();
     loop {}
 }
