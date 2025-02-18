@@ -63,6 +63,9 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
 #[cfg(test)]
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
+    // running cargo test --lib, since Rust tests the lib.rs completely independently of the main.rs.
+    //We need to call init here to set up an IDT before running the tests.
+    init();
     test_main();
     loop {}
 }
