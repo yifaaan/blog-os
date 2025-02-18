@@ -4,6 +4,8 @@
 #![test_runner(blog_os::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+use x86_64::structures::idt::InterruptDescriptorTable;
+
 use blog_os::println;
 use core::panic::PanicInfo;
 static HELLO: &[u8] = b"Hello, world!";
@@ -25,9 +27,16 @@ fn panic(info: &PanicInfo) -> ! {
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    // panic!("Some panic message");
+    println!("Hello, World{}", "!");
+
+    blog_os::init();
+
+    x86_64::instructions::interrupts::int3();
+
     #[cfg(test)]
     test_main();
+
+    println!("It did not crash!");
 
     loop {}
 }
