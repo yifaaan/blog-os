@@ -19,6 +19,11 @@ test-args = [
 test-success-exit-code = 33
 test-timeout = 300          # (in seconds)
 
+
+[[test]]
+name = "should_panic"
+harness = false
+
 [dependencies]
 bootloader = "0.9"
 lazy_static = { version = "1.5.0", features = ["spin_no_std"] }
