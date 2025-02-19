@@ -15,7 +15,7 @@ static HELLO: &[u8] = b"Hello, world!";
 #[panic_handler]
 fn panic(_info: &PanicInfo) -> ! {
     println!("{}", _info);
-    loop {}
+    blog_os::hlt_loop();
 }
 
 /// When running unit tests, panic handler
@@ -42,8 +42,5 @@ pub extern "C" fn _start() -> ! {
 
     println!("It did not crash!");
 
-    loop {
-        use blog_os::print;
-        print!("-");
-    }
+    blog_os::hlt_loop();
 }
