@@ -24,6 +24,10 @@ test-timeout = 300          # (in seconds)
 name = "should_panic"
 harness = false
 
+[[test]]
+name = "stack_overflow"
+harness = false
+
 [dependencies]
 bootloader = "0.9"
 lazy_static = { version = "1.5.0", features = ["spin_no_std"] }
