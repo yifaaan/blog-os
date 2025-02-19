@@ -30,6 +30,7 @@ lazy_static! {
                 .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX);
         }
         idt[InterruptIndex::Timer.as_u8()].set_handler_fn(timer_interrupt_handler);
+        idt[InterruptIndex::Keyboard.as_u8()].set_handler_fn(keyboard_interrupt_handler);
         idt
     };
 }
@@ -64,6 +65,38 @@ extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFr
     }
 }
 
+/// Keyboard interrupt handler
+extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
+    use x86_64::instructions::port::Port;
+
+    // Must read the scancode from the keyboard controller
+    // to clean the interrupt status register, otherwise
+    // the keyboard controller won't send another interrupt
+    let mut port = Port::new(0x60);
+    let scancode: u8 = unsafe { port.read() };
+
+    if let Some(key) = match scancode {
+        0x02 => Some('1'),
+        0x03 => Some('2'),
+        0x04 => Some('3'),
+        0x05 => Some('4'),
+        0x06 => Some('5'),
+        0x07 => Some('6'),
+        0x08 => Some('7'),
+        0x09 => Some('8'),
+        0x0A => Some('9'),
+        0x0B => Some('0'),
+        _ => None,
+    } {
+        print!("{}", key);
+    }
+
+    unsafe {
+        PICS.lock()
+            .notify_end_of_interrupt(InterruptIndex::Keyboard.as_u8());
+    }
+}
+
 #[test_case]
 fn test_breakpoint_exception() {
     x86_64::instructions::interrupts::int3();
@@ -73,7 +106,11 @@ fn test_breakpoint_exception() {
 #[derive(Debug, Clone, Copy)]
 #[repr(u8)]
 pub enum InterruptIndex {
+    /// Timer interrupt
     Timer = PIC_1_OFFSET,
+
+    /// Keyboard interrupt
+    Keyboard,
 }
 
 impl InterruptIndex {
