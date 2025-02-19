@@ -6,6 +6,7 @@
 #![feature(abi_x86_interrupt)]
 use core::panic::PanicInfo;
 
+pub mod gdt;
 pub mod interrupts;
 pub mod serial;
 pub mod vga_buffer;
@@ -78,5 +79,8 @@ fn panic(info: &PanicInfo) -> ! {
 
 /// Initialize the kernel
 pub fn init() {
+    // Initialize the GDT
+    gdt::init();
+    // Initialize the IDT
     interrupts::init_idt();
 }
