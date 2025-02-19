@@ -6,8 +6,11 @@
 #![feature(abi_x86_interrupt)]
 use core::panic::PanicInfo;
 
+use bootloader::{entry_point, BootInfo};
+
 pub mod gdt;
 pub mod interrupts;
+pub mod memory;
 pub mod serial;
 pub mod vga_buffer;
 
@@ -60,12 +63,15 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     hlt_loop();
 }
 
+#[cfg(test)]
+entry_point!(test_kernel_main);
+
 /// Entry point for `cargo test`
 #[cfg(test)]
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+fn test_kernel_main(_boot_info: &'static BootInfo) -> ! {
     // running cargo test --lib, since Rust tests the lib.rs completely independently of the main.rs.
     //We need to call init here to set up an IDT before running the tests.
+
     init();
     test_main();
     hlt_loop();
