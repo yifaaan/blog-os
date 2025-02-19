@@ -83,4 +83,10 @@ pub fn init() {
     gdt::init();
     // Initialize the IDT
     interrupts::init_idt();
+    // Initialize the PICS
+    unsafe {
+        interrupts::PICS.lock().initialize();
+    }
+    // Enable externalinterrupts
+    x86_64::instructions::interrupts::enable();
 }
