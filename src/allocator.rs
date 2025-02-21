@@ -1,5 +1,6 @@
 use bump::BumpAllocator;
 
+use fixed_size_block::FixedSizeBlockAllocator;
 use linked_list::LinkedListAllocator;
 use x86_64::{
     structures::paging::{
@@ -9,6 +10,7 @@ use x86_64::{
 };
 
 pub mod bump;
+pub mod fixed_size_block;
 pub mod linked_list;
 
 pub const HEAP_START: usize = 0x_4444_4444_0000;
@@ -32,7 +34,7 @@ impl<T> Locked<T> {
 }
 
 #[global_allocator]
-static ALLOCATOR: Locked<LinkedListAllocator> = Locked::new(LinkedListAllocator::new());
+static ALLOCATOR: Locked<FixedSizeBlockAllocator> = Locked::new(FixedSizeBlockAllocator::new());
 
 pub unsafe fn init_heap(
     mapper: &mut impl Mapper<Size4KiB>,
