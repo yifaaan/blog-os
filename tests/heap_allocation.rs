@@ -58,3 +58,12 @@ fn large_vect() {
 fn many_boxes() {
     (0..HEAP_SIZE).map(|x| Box::new(x)).count();
 }
+
+#[test_case]
+fn many_boxes_long() {
+    let long_lived = Box::new(1);
+    (0..HEAP_SIZE).map(|x| Box::new(x)).count();
+
+    println!("long_lived = {}", *long_lived);
+    // assert_eq!(*long_lived, 1);
+}
