@@ -83,33 +83,34 @@ extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFr
 
 /// Keyboard interrupt handler
 extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
-    use spin::Mutex;
+    // use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
+    // use spin::Mutex;
     use x86_64::instructions::port::Port;
 
-    lazy_static! {
-        static ref KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> =
-            Mutex::new(Keyboard::new(
-                ScancodeSet1::new(),
-                layouts::Us104Key,
-                HandleControl::Ignore
-            ));
-    }
-    let mut keyboard = KEYBOARD.lock();
+    // lazy_static! {
+    //     static ref KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> =
+    //         Mutex::new(Keyboard::new(
+    //             ScancodeSet1::new(),
+    //             layouts::Us104Key,
+    //             HandleControl::Ignore
+    //         ));
+    // }
+    // let mut keyboard = KEYBOARD.lock();
     // Must read the scancode from the keyboard controller
     // to clean the interrupt status register, otherwise
     // the keyboard controller won't send another interrupt
     let mut port = Port::new(0x60);
     let scancode: u8 = unsafe { port.read() };
 
-    if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
-        if let Some(key) = keyboard.process_keyevent(key_event) {
-            match key {
-                DecodedKey::Unicode(c) => print!("{}", c),
-                DecodedKey::RawKey(key) => print!("{:?}", key),
-            }
-        }
-    }
+    crate::task::keyboard::add_scancode(scancode);
+    // if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
+    //     if let Some(key) = keyboard.process_keyevent(key_event) {
+    //         match key {
+    //             DecodedKey::Unicode(c) => print!("{}", c),
+    //             DecodedKey::RawKey(key) => print!("{:?}", key),
+    //         }
+    //     }
+    // }
 
     unsafe {
         PICS.lock()

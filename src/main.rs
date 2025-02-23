@@ -11,6 +11,7 @@ use blog_os::{
     allocator,
     memory::{self, EmptyFrameAllocator},
     println,
+    task::{keyboard::print_keypresses, simple_executor::SimpleExecutor, Task},
 };
 
 use bootloader::{entry_point, BootInfo};
@@ -52,17 +53,10 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
         allocator::init_heap(&mut mapper, &mut frame_allocator).unwrap();
     }
 
-    let a = Box::new(1);
-    println!("a at {:#p}", a);
-    let mut vec = (1..1000).collect::<Vec<u16>>();
-
-    let rc = Rc::new(vec![12, 2, 3]);
-    let crc = rc.clone();
-    println!("rc is {}", Rc::strong_count(&rc));
-    core::mem::drop(rc);
-    println!("rc is {}", Rc::strong_count(&crc));
-
-    println!("vec at {:#p}", vec.as_slice());
+    let mut executor = SimpleExecutor::new();
+    executor.spawn(Task::new(async_task()));
+    executor.spawn(Task::new(print_keypresses()));
+    executor.run();
 
     #[cfg(test)]
     test_main();
@@ -70,4 +64,13 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     println!("It did not crash!");
 
     blog_os::hlt_loop();
+}
+
+async fn async_number() -> u32 {
+    42
+}
+
+async fn async_task() {
+    let number = async_number().await;
+    println!("number: {}", number);
 }
